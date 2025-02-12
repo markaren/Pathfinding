@@ -6,6 +6,8 @@ option(PATHFINDING_BUILD_EXAMPLES "Build examples" ON)
 set(CMAKE_CXX_STANDARD 20)
 
 
+include(GNUInstallDirs)
+
 add_library(pathfinding INTERFACE
         "${CMAKE_CURRENT_SOURCE_DIR}/include/pathfinding/Coordinate.hpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/include/pathfinding/Heuristic.hpp"
@@ -19,7 +21,10 @@ add_library(pathfinding INTERFACE
         "${CMAKE_CURRENT_SOURCE_DIR}/include/pathfinding/heuristics/ClosestSquaredHeuristic.hpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/include/pathfinding/heuristics/ManhattanHeuristic.hpp"
 )
-target_include_directories(pathfinding INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/include")
+target_include_directories(pathfinding INTERFACE
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+        "$<INSTALL_INTERFACE:include>"
+)
 
 
 if (PATHFINDING_BUILD_EXAMPLES)
@@ -36,3 +41,8 @@ if (PATHFINDING_BUILD_EXAMPLES)
 
     add_subdirectory(examples)
 endif ()
+
+
+install(TARGETS pathfinding EXPORT pathfinding-targets)
+install(DIRECTORY "include/" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+install(EXPORT pathfinding-targets NAMESPACE pathfinding:: DESTINATION "${CMAKE_INSTALL_DATADIR}/pathfinding")
