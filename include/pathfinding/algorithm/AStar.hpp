@@ -8,6 +8,8 @@
 
 #include <algorithm>
 #include <memory>
+#include <queue>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -19,12 +21,12 @@ namespace pathfinding {
 
     public:
         explicit AStar(std::unique_ptr<TileBasedMap> map, std::unique_ptr<Heuristic> heuristic = nullptr)
-            : map(std::move(map)), heuristic(std::move(heuristic)) {
+            : map(std::move(map)), heuristic(std::move(heuristic)),
+              nodes(this->map->width() * this->map->height()) {
 
             for (int x = 0; x < this->map->width(); x++) {
-                nodes.emplace_back();
                 for (int y = 0; y < this->map->height(); y++) {
-                    nodes[x].emplace_back(Coordinate{x, y});
+                    nodes[index(x, y)] = Node{{x, y}};
                 }
             }
         }
@@ -40,35 +42,42 @@ namespace pathfinding {
 
         std::optional<Path> findPath(const Coordinate& s, const Coordinate& t) override {
 
-            std::vector<Node*> closed;
-            std::vector<Node*> open;
-
             // easy first check, if the destination is blocked, we can't get there
             if (map->blocked(s) || map->blocked(t)) {
                 return std::nullopt;
             }
 
+            for (auto& node : nodes) {
+                node.reset();
+            }
+
+            std::unordered_set<Node*> closed;
+            std::priority_queue<Node*> open;
+
             // initial state for A*. The closed group is empty. Only the starting
             // tile is in the open list and it's cost is zero, i.e. we're already there
-            nodes[s.x][s.y].cost = 0;
-            nodes[s.x][s.y].depth = 0;
+            Node& startNode = nodes[index(s.x, s.y)];
+            Node& targetNode = nodes[index(t.x, t.y)];
 
-            open.push_back(&nodes[s.x][s.y]);
+            startNode.cost = 0;
+            startNode.depth = 0;
+            targetNode.parent = nullptr;
 
-            nodes[t.x][t.y].parent = nullptr;
+            open.emplace(&startNode);
 
             // while we haven't found the goal and haven't exceeded our max search depth
             int maxDepth = 0;
             while ((maxDepth < maxSearchDistance) && (!open.empty())) {
                 // pull out the first node in our open list, this is determined to
                 // be the most likely to be the next step based on our heuristic
-                Node* current = open.front();
-                if (current == &nodes[t.x][t.y]) {
+                Node* current = open.top();
+                open.pop();
+
+                if (current == &targetNode) {
                     break;
                 }
 
-                removeFrom(open, current);
-                closed.push_back(current);
+                closed.emplace(current);
 
                 // search through all the neighbours of the current node evaluating
                 // them as next steps
@@ -94,31 +103,16 @@ namespace pathfinding {
                             // the cost to get to this node is cost the current plus the
                             // movement cost to reach this node. Note that the heuristic value
                             // is only used in the sorted open list
-                            float nextStepCost = current->cost + getMovementCost(current->xy, p);
-                            Node* neighbour = &nodes[p.x][p.y];
+                            Node& neighbor = nodes[index(p.x, p.y)];
+                            const float nextStepCost = current->cost + getMovementCost(current->xy, p);
 
-                            // if the new cost we've determined for this node is lower than
-                            // it has been previously makes sure the node hasn't been discarded.
-                            // We've determined that there might have been a better path to get
-                            // to this node, so it needs to be re-evaluated
-                            if (nextStepCost < neighbour->cost) {
-                                if (contains(open, neighbour)) {
-                                    removeFrom(open, neighbour);
+                            if (nextStepCost < neighbor.cost || neighbor.parent == nullptr) {
+                                if (!closed.contains(&neighbor)) {
+                                    neighbor.cost = nextStepCost;
+                                    neighbor.heuristic = getHeuristicCost(p, t);
+                                    maxDepth = std::max(maxDepth, neighbor.setParent(current));
+                                    open.push(&neighbor);
                                 }
-                                if (contains(closed, neighbour)) {
-                                    removeFrom(closed, neighbour);
-                                }
-                            }
-
-                            // if the node hasn't already been processed and discarded then
-                            // reset it's cost to our current cost and add it as a next possible
-                            // step (i.e. to the open list)
-                            if (!contains(open, neighbour) && !(contains(closed, neighbour))) {
-                                neighbour->cost = nextStepCost;
-                                neighbour->heuristic = getHeuristicCost(p, t);
-                                maxDepth = std::max(maxDepth, neighbour->setParent(current));
-                                open.push_back(neighbour);
-                                std::ranges::sort(open);
                             }
                         }
                     }
@@ -127,7 +121,7 @@ namespace pathfinding {
 
             // since we've got an empty open list, or we've run out of search
             // there was no path. Just return null
-            if (nodes[t.x][t.y].parent == nullptr) {
+            if (targetNode.parent == nullptr) {
                 return std::nullopt;
             }
 
@@ -135,10 +129,8 @@ namespace pathfinding {
             // references of the nodes to find out way from the target location back
             // to the start recording the nodes on the way.
             Path path;
-            Node* target = &nodes[t.x][t.y];
-            while (target != &nodes[s.x][s.y]) {
-                path.prependStep(target->xy);
-                target = target->parent;
+            for (const Node* n = &targetNode; n != &startNode; n = n->parent) {
+                path.prependStep(n->xy);
             }
             path.prependStep(s);
 
@@ -155,7 +147,7 @@ namespace pathfinding {
             // The coordinate of the node
             Coordinate xy;
 
-            float cost = 0;
+            float cost = std::numeric_limits<float>::max();
             /** The parent of this node, how we reached it in the search */
             Node* parent = nullptr;
             /** The heuristic cost of this node */
@@ -163,13 +155,18 @@ namespace pathfinding {
             /** The search depth of this node */
             int depth = 0;
 
-            explicit Node(const Coordinate& c): xy(c) {}
-
             int setParent(Node* p) {
                 depth = p->depth + 1;
                 this->parent = p;
 
                 return depth;
+            }
+
+            void reset() {
+                cost = std::numeric_limits<float>::max();
+                parent = nullptr;
+                heuristic = 0;
+                depth = 0;
             }
 
             // used for sorting
@@ -186,10 +183,14 @@ namespace pathfinding {
         std::unique_ptr<TileBasedMap> map;
         std::unique_ptr<Heuristic> heuristic;
 
-        std::vector<std::vector<Node>> nodes;
+        std::vector<Node> nodes;
 
         int maxSearchDistance = 100;
         bool allowDiagMovement = true;
+
+        [[nodiscard]] int index(int x, int y) const {
+            return y * map->width() + x;
+        }
 
         static bool contains(const std::vector<Node*>& list, Node* node) {
 
@@ -198,7 +199,7 @@ namespace pathfinding {
 
         static void removeFrom(std::vector<Node*>& list, Node* node) {
 
-            std::erase(list, node);
+            std::erase_if(list, [&](Node* n) { return n == node; });
         }
 
         /**
