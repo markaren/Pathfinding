@@ -11,6 +11,7 @@
 #include <vector>
 
 using namespace threepp;
+using namespace pathfinding;
 
 namespace {
 

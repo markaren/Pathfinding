@@ -7,7 +7,7 @@
 #include <utility>
 #include <vector>
 
-class GameMap : public TileBasedMap {
+class GameMap : public pathfinding::TileBasedMap {
 public:
     explicit GameMap(std::vector<std::string> data)
         : data_(std::move(data)) {
@@ -35,13 +35,13 @@ public:
         return data_[y][x];
     }
 
-    [[nodiscard]] bool blocked(const Coordinate &v) const override {
+    [[nodiscard]] bool blocked(const pathfinding::Coordinate &v) const override {
         const char c = get(v.x, v.y);
         const bool blocked = (c == '1');
         return blocked;
     }
 
-    [[nodiscard]] float getCost(const Coordinate &start, const Coordinate &target) const override {
+    [[nodiscard]] float getCost(const pathfinding::Coordinate &start, const pathfinding::Coordinate &target) const override {
         // Calculate the absolute difference in x and y coordinates
         const auto dx = abs(target.x - start.x);
         const auto dy = abs(target.y - start.y);

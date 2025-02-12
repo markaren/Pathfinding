@@ -7,22 +7,25 @@
 
 #include <optional>
 
-class Pathfinder {
+namespace pathfinding {
 
-public:
-    /**
-	 * Find a path from the starting location to the target
-	 * location, avoiding blockages and attempting to honour costs
-	 * provided by the tile map.
-	 *
-	 * @param start The coordinate of the start location
-	 * @param target The coordinate of the target location
-     *
-	 * @return The path found from start to end, or null if no path can be found.
-	 */
-    [[nodiscard]] virtual std::optional<Path> findPath(const Coordinate& start, const Coordinate& target) = 0;
+    class Pathfinder {
 
-    virtual ~Pathfinder() = default;
-};
+    public:
+        /**
+         * Find a path from the starting location to the target
+         * location, avoiding blockages and attempting to honour costs
+         * provided by the tile map.
+         *
+         * @param start The coordinate of the start location
+         * @param target The coordinate of the target location
+         *
+         * @return The path found from start to end, or null if no path can be found.
+         */
+        [[nodiscard]] virtual std::optional<Path> findPath(const Coordinate& start, const Coordinate& target) = 0;
+
+        virtual ~Pathfinder() = default;
+    };
+}// namespace pathfinding
 
 #endif//PATHFINDING_PATHFINDER_HPP

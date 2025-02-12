@@ -7,20 +7,23 @@
 
 #include <cmath>
 
-/**
- * A heuristic that uses the tile that is closest to the target
- * as the next best tile.
- */
-class ClosestHeuristic: public Heuristic {
 
-public:
-    float getCost(const TileBasedMap& map, const Coordinate& start, const Coordinate& target) override {
-        const auto dx = static_cast<float>(target.x - start.x);
-        const auto dy = static_cast<float>(target.y - start.y);
+namespace pathfinding {
+    /**
+     * A heuristic that uses the tile that is closest to the target
+     * as the next best tile.
+     */
+    class ClosestHeuristic: public Heuristic {
 
-        const auto result = std::sqrt((dx * dx) + (dy * dy));
-        return result;
-    }
-};
+    public:
+        float getCost(const TileBasedMap& map, const Coordinate& start, const Coordinate& target) override {
+            const auto dx = static_cast<float>(target.x - start.x);
+            const auto dy = static_cast<float>(target.y - start.y);
+
+            const auto result = std::sqrt((dx * dx) + (dy * dy));
+            return result;
+        }
+    };
+}// namespace pathfinding
 
 #endif//PATHFINDING_CLOSESTHEURISTIC_HPP

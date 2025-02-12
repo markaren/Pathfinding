@@ -5,44 +5,46 @@
 
 #include <ostream>
 
-/**
- * Represents an xy coordinate in a grid
- */
-class Coordinate {
-public:
-    int x, y;
+namespace pathfinding {
+    /**
+     * Represents an xy coordinate in a grid
+     */
+    class Coordinate {
+    public:
+        int x, y;
 
-    Coordinate(): Coordinate(0, 0) {}
-    Coordinate(int x, int y): x(x), y(y) {}
+        Coordinate(): Coordinate(0, 0) {}
+        Coordinate(int x, int y): x(x), y(y) {}
 
-    Coordinate operator+(const Coordinate& other) const {
-        return {x + other.x, y + other.y};
-    }
+        Coordinate operator+(const Coordinate& other) const {
+            return {x + other.x, y + other.y};
+        }
 
-    Coordinate operator-(const Coordinate& other) const {
-        return {x - other.x, y - other.y};
-    }
+        Coordinate operator-(const Coordinate& other) const {
+            return {x - other.x, y - other.y};
+        }
 
-    Coordinate& operator+=(const Coordinate& other) {
-        x += other.x;
-        y += other.y;
-        return *this;
-    }
+        Coordinate& operator+=(const Coordinate& other) {
+            x += other.x;
+            y += other.y;
+            return *this;
+        }
 
-    Coordinate& operator-=(const Coordinate& other) {
-        x -= other.x;
-        y -= other.y;
-        return *this;
-    }
+        Coordinate& operator-=(const Coordinate& other) {
+            x -= other.x;
+            y -= other.y;
+            return *this;
+        }
 
-    bool operator==(const Coordinate& other) const {
-        return x == other.x && y == other.y;
-    }
+        bool operator==(const Coordinate& other) const {
+            return x == other.x && y == other.y;
+        }
 
-    friend std::ostream& operator<<(std::ostream& os, const Coordinate& v) {
-        os << "[" << v.x << ", " << v.y << "]";
-        return os;
-    }
-};
+        friend std::ostream& operator<<(std::ostream& os, const Coordinate& v) {
+            os << "[" << v.x << ", " << v.y << "]";
+            return os;
+        }
+    };
+}// namespace pathfinding
 
 #endif//PATHFINDING_COORDINATE_HPP
