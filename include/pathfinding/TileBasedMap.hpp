@@ -46,7 +46,7 @@ public:
      *
 	 * @return The relative cost of moving across the given tile
 	 */
-    virtual float getCost(const Coordinate& start, const Coordinate& target) = 0;
+    [[nodiscard]] virtual float getCost(const Coordinate& start, const Coordinate& target) const  = 0;
 
     virtual ~TileBasedMap() = default;
 };

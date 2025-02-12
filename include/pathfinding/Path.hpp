@@ -72,7 +72,7 @@ public:
      */
     [[nodiscard]] bool contains(const Coordinate& c) {
 
-        return std::find(steps_.begin(), steps_.end(), c) != std::end(steps_);
+        return std::ranges::find(steps_, c) != std::end(steps_);
     }
 
 private:

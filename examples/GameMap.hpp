@@ -1,6 +1,5 @@
-
-#ifndef THREEPP_GAMEMAP_HPP
-#define THREEPP_GAMEMAP_HPP
+#ifndef PATHFINDING_GAMEMAP_HPP
+#define PATHFINDING_GAMEMAP_HPP
 
 #include "pathfinding/TileBasedMap.hpp"
 
@@ -8,15 +7,14 @@
 #include <utility>
 #include <vector>
 
-class GameMap: public TileBasedMap {
-
+class GameMap : public TileBasedMap {
 public:
-    explicit GameMap(std::vector<std::string> data): data_(std::move(data)) {
-
+    explicit GameMap(std::vector<std::string> data)
+        : data_(std::move(data)) {
         height_ = data_.size();
 
         // check that width is consistent
-        unsigned width = data_[0].size();
+        const unsigned width = data_[0].size();
         for (int i = 1; i < data_.size(); i++) {
             if (data_[i].size() != width) {
                 throw std::runtime_error("Input breadth mismatch!");
@@ -26,37 +24,32 @@ public:
     }
 
     [[nodiscard]] unsigned int width() const override {
-
         return width_;
     }
 
     [[nodiscard]] unsigned int height() const override {
-
         return height_;
     }
 
     [[nodiscard]] char get(int x, int y) const {
-
         return data_[y][x];
     }
 
-    [[nodiscard]] bool blocked(const Coordinate& v) const override {
-
-        char c = get(v.x, v.y);
-        bool blocked = (c == '1');
+    [[nodiscard]] bool blocked(const Coordinate &v) const override {
+        const char c = get(v.x, v.y);
+        const bool blocked = (c == '1');
         return blocked;
     }
 
-    float getCost(const Coordinate& start, const Coordinate& target) override {
-
+    [[nodiscard]] float getCost(const Coordinate &start, const Coordinate &target) const override {
         // Calculate the absolute difference in x and y coordinates
-        int dx = abs(target.x - start.x);
-        int dy = abs(target.y - start.y);
+        const auto dx = abs(target.x - start.x);
+        const auto dy = abs(target.y - start.y);
 
         // Higher cost for diagonal movements
         float cost = 1.0f;
         if (dx > 0 && dy > 0) {
-            cost = 1.5f;// Adjust this value as needed
+            cost = 1.5f; // Adjust this value as needed
         }
 
         return cost;
@@ -72,4 +65,4 @@ private:
 };
 
 
-#endif//THREEPP_GAMEMAP_HPP
+#endif//PATHFINDING_GAMEMAP_HPP

@@ -7,8 +7,6 @@
 #include "pathfinding/TileBasedMap.hpp"
 
 #include <algorithm>
-#include <cmath>
-#include <iostream>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -119,7 +117,7 @@ public:
                             neighbour->heuristic = getHeuristicCost(p, t);
                             maxDepth = std::max(maxDepth, neighbour->setParent(current));
                             open.push_back(neighbour);
-                            std::sort(open.begin(), open.end());
+                            std::ranges::sort(open);
                         }
                     }
                 }
@@ -175,8 +173,8 @@ private:
 
         // used for sorting
         bool operator<(const Node& other) const {
-            float f = heuristic + cost;
-            float of = other.heuristic + other.cost;
+            const auto f = heuristic + cost;
+            const auto of = other.heuristic + other.cost;
 
             return f < of;
         }
@@ -194,12 +192,12 @@ private:
 
     static bool contains(const std::vector<Node*>& list, Node* node) {
 
-        return std::find(list.begin(), list.end(), node) != std::end(list);
+        return std::ranges::find(list, node) != std::end(list);
     }
 
     static void removeFrom(std::vector<Node*>& list, Node* node) {
 
-        list.erase(std::remove(list.begin(), list.end(), node), list.end());
+        std::erase(list, node);
     }
 
     /**
@@ -244,7 +242,7 @@ private:
      *
 	 * @return The heuristic cost assigned to the tile
 	 */
-    float getHeuristicCost(const Coordinate& s, const Coordinate& t) {
+    [[nodiscard]] float getHeuristicCost(const Coordinate& s, const Coordinate& t) const {
 
         if (!heuristic) return 0;// Dijkstra's
 

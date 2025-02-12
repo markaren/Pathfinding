@@ -7,7 +7,7 @@
 #include "pathfinding/heuristics/ClosestSquaredHeuristic.hpp"
 #include "pathfinding/heuristics/ManhattanHeuristic.hpp"
 
-#include <stdexcept>
+#include <iostream>
 #include <vector>
 
 using namespace threepp;
@@ -96,7 +96,7 @@ int main() {
     Raycaster raycaster;
     raycaster.layers.set(1);// ignore grid
     Vector2 mouse{-Infinity<float>, -Infinity<float>};
-    MouseUpListener mouseListener([&](int button, Vector2 pos) {
+    MouseUpListener mouseListener([&](int, Vector2 pos) {
         if (start && target) return;
 
         const auto s = canvas.size();

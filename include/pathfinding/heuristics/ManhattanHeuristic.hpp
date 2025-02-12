@@ -14,14 +14,14 @@
 class ManhattanHeuristic: public Heuristic {
 
 public:
-    explicit ManhattanHeuristic(int minimumCost): minimumCost_(minimumCost) {}
+    explicit ManhattanHeuristic(float minimumCost): minimumCost_(minimumCost) {}
 
-    float getCost(TileBasedMap& map, const Coordinate& start, const Coordinate& target) override {
-        return minimumCost_ * (std::abs(start.x - target.x) + std::abs(start.y - target.y));
+    float getCost(const TileBasedMap& map, const Coordinate& start, const Coordinate& target) override {
+        return minimumCost_ * static_cast<float>(std::abs(start.x - target.x) + std::abs(start.y - target.y));
     }
 
 private:
-    int minimumCost_;
+    float minimumCost_;
 };
 
 #endif//PATHFINDING_MANHATTANHEURISTIC_HPP
