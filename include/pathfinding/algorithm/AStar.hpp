@@ -19,6 +19,12 @@ namespace pathfinding {
     private:
         struct Node;// forward declaration
 
+        struct NodeComparator {
+            bool operator()(const Node* a, const Node* b) const {
+                return (a->cost + a->heuristic) > (b->cost + b->heuristic);
+            }
+        };
+
     public:
         explicit AStar(std::unique_ptr<TileBasedMap> map, std::unique_ptr<Heuristic> heuristic = nullptr)
             : map(std::move(map)), heuristic(std::move(heuristic)),
@@ -52,7 +58,7 @@ namespace pathfinding {
                 return std::nullopt;
             }
 
-            std::priority_queue<Node*> open;
+            std::priority_queue<Node*, std::vector<Node*>, NodeComparator> open;
             std::unordered_set<Node*> closed;
 
             // initial state for A*. The closed group is empty. Only the starting
@@ -174,14 +180,6 @@ namespace pathfinding {
                 parent = nullptr;
                 heuristic = 0;
                 depth = 0;
-            }
-
-            // used for sorting
-            bool operator<(const Node& other) const {
-                const auto f = heuristic + cost;
-                const auto of = other.heuristic + other.cost;
-
-                return f < of;
             }
 
             ~Node() = default;
