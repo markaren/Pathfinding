@@ -83,7 +83,7 @@ namespace pathfinding {
          *
          * @return True if contains the coordinate, false otherwise
          */
-        [[nodiscard]] bool contains(const Coordinate& c) {
+        [[nodiscard]] bool contains(const Coordinate& c) const {
 
             return std::ranges::find(steps_, c) != std::end(steps_);
         }
