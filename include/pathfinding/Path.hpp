@@ -8,6 +8,7 @@
 #include <ostream>
 #include <stdexcept>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 namespace pathfinding {
@@ -64,6 +65,18 @@ namespace pathfinding {
             return steps_.back();
         }
 
+        [[nodiscard]] std::vector<Coordinate> steps() const {
+            return steps_;
+        }
+
+        [[nodiscard]] std::vector<Coordinate> closed() const {
+            return closed_;
+        }
+
+        void setClosed(const std::vector<Coordinate>& closed) {
+            closed_ = closed;
+        }
+
         /**
          * Check if a given Coordinate is part of the Path
          * @param c The coordinate to check
@@ -77,6 +90,7 @@ namespace pathfinding {
 
     private:
         std::vector<Coordinate> steps_;
+        std::vector<Coordinate> closed_;
     };
 }// namespace pathfinding
 

@@ -42,17 +42,18 @@ namespace pathfinding {
 
         std::optional<Path> findPath(const Coordinate& s, const Coordinate& t) override {
 
+            // reset
+            for (auto& node : nodes) {
+                node.reset();
+            }
+
             // easy first check, if the destination is blocked, we can't get there
             if (map->blocked(s) || map->blocked(t)) {
                 return std::nullopt;
             }
 
-            for (auto& node : nodes) {
-                node.reset();
-            }
-
-            std::unordered_set<Node*> closed;
             std::priority_queue<Node*> open;
+            std::unordered_set<Node*> closed;
 
             // initial state for A*. The closed group is empty. Only the starting
             // tile is in the open list and it's cost is zero, i.e. we're already there
@@ -133,6 +134,12 @@ namespace pathfinding {
                 path.prependStep(n->xy);
             }
             path.prependStep(s);
+
+            std::vector<Coordinate> closedCoords;
+            std::ranges::transform(closed, std::back_inserter(closedCoords), [](const Node* node) {
+                return node->xy;
+            });
+            path.setClosed(closedCoords);
 
             // that's it, we have our path
             return path;
